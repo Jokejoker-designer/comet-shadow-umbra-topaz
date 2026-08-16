@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FPGA Learning Graph — After-Train Chat</title>
+<style>
+:root{
+ --bg:#0b1020;--panel:#11182b;--panel2:#151f36;--line:#263451;
+ --text:#eef3ff;--muted:#8f9bb3;--blue:#6d89ff;--cyan:#46d5ff;
+ --green:#49d889;--yellow:#ffc95c;--red:#ff6e78;--violet:#9b7cff;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+.shell{display:grid;grid-template-columns:250px 1fr 330px;height:100vh}
+.sidebar,.inspector{background:var(--panel);padding:18px;border-right:1px solid #202b43;overflow:auto}
+.inspector{border-right:0;border-left:1px solid #202b43}
+.brand{display:flex;gap:11px;align-items:center;margin-bottom:22px}.mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#07101f;font-weight:900}
+.brand small{display:block;color:var(--muted);margin-top:3px}
+.nav a{display:block;color:#cdd6e9;text-decoration:none;padding:10px 12px;margin:5px 0;border-radius:9px}.nav a.active{background:#24345d;color:white}.nav a:hover{background:#18243f}
+.status{margin-top:24px;padding:12px;border-radius:11px;background:#12251e;border:1px solid #275a43}.status b{color:var(--green)}.status small{display:block;color:#91b6a4;margin-top:4px}
+main{display:grid;grid-template-rows:78px 92px 1fr;min-width:720px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #202b43}
+.topbar h1{margin:0;font-size:19px}.topbar p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.badges{display:flex;gap:8px}.badge{font-size:11px;font-weight:800;padding:7px 10px;border-radius:999px;background:#26314a}.badge.good{background:#153c2b;color:#75e7aa}.badge.blue{background:#1d3155;color:#8db6ff}.badge.red{background:#47232a;color:#ff9ca4}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:12px 18px;border-bottom:1px solid #202b43}
+.kpi{background:var(--panel2);border:1px solid #283754;border-radius:11px;padding:10px}.kpi span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em}.kpi b{font-size:17px;display:block;margin-top:4px}.kpi small{font-size:10px;color:var(--muted)}
+.workspace{display:grid;grid-template-columns:minmax(430px,1fr) 390px;gap:12px;padding:14px;overflow:hidden}
+.chat,.graph{background:var(--panel);border:1px solid #23304b;border-radius:14px;overflow:hidden}
+.panel-head{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #25314a}.panel-head small{color:var(--muted)}
+.chat-body{height:calc(100% - 116px);padding:15px;overflow:auto;background:radial-gradient(circle at 1px 1px,#202b43 1px,transparent 1.1px);background-size:26px 26px}
+.msg{max-width:80%;margin:9px 0;padding:11px 13px;border-radius:13px;font-size:13px;line-height:1.45}.user{margin-left:auto;background:#273c72}.bot{background:#16263a;border:1px solid #264866}.meta{font-size:9px;color:#8fa8c6;margin-top:6px}.meta b{color:var(--green)}
+.composer{height:64px;border-top:1px solid #25314a;padding:10px;display:flex;gap:8px}.composer input{flex:1;background:#111a2d;border:1px solid #30405e;border-radius:10px;color:white;padding:0 12px}.composer button{width:100px;border:0;border-radius:10px;background:var(--blue);color:white;font-weight:800}
+.graph-body{height:calc(100% - 52px);position:relative;background:radial-gradient(circle at 1px 1px,#23304a 1px,transparent 1.1px);background-size:24px 24px}
+.node{position:absolute;background:#141f34;border:1px solid #3a4a69;border-radius:11px;padding:9px 11px;min-width:100px;text-align:center;font-size:11px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.node b{display:block;font-size:13px;margin-bottom:3px}.node.agent{border-color:#725ad1}.node.syn{border-color:#9d7c2a}.node.fpga{border-color:#3977b6}.node.pass{border-color:#2f8a5a}.wire{position:absolute;height:3px;background:var(--green);transform-origin:left center;border-radius:5px;opacity:.85}
+.legend{position:absolute;right:9px;bottom:9px;background:#0c1322cc;border:1px solid #27344e;padding:7px 9px;border-radius:9px;font-size:10px;color:var(--muted)}
+.inspector h2{font-size:15px;margin:0 0 12px}.card{background:var(--panel2);border:1px solid #283754;border-radius:11px;padding:12px;margin-bottom:10px}.card h3{font-size:12px;margin:0 0 8px}.row{display:flex;justify-content:space-between;border-bottom:1px solid #24304a;padding:6px 0;font-size:11px}.row:last-child{border-bottom:0}.row span{color:var(--muted)}.ok{color:var(--green)!important}.warn{color:var(--yellow)!important}.off{color:#9fb0cb!important}
+.proof{padding:10px;border-radius:10px;background:#11241c;border:1px solid #28583f;color:#bcebd0;font-size:11px;line-height:1.5}
+hr{border:0;border-top:1px solid #27344e}
+</style>
+</head>
+<body>
+<div class="shell">
+ <aside class="sidebar">
+  <div class="brand"><div class="mark">FG</div><div><b>FPGA Learning Graph</b><small>8-Agent Full Parallel</small></div></div>
+  <nav class="nav">
+   <a href="#">Tổng quan</a><a href="#">Training LIVE</a><a href="#">Agent Graph</a>
+   <a class="active" href="#">Chat After-Train</a><a href="#">Sessions</a>
+   <a href="#">Anti-Hardcode Proof</a><a href="#">Verification</a><a href="#">Vivado</a>
+   <a href="#">Báo cáo</a><a href="#">Cài đặt</a>
+  </nav>
+  <div class="status"><b>● LOCAL INFERENCE</b><small>Không dùng external AI trong AFTER-TRAIN</small></div>
+ </aside>
+
+ <main>
+  <header class="topbar">
+   <div><h1>Chatbot After-Train</h1><p>Đánh giá hội thoại bằng trọng số đã học — teacher bị ngắt hoàn toàn.</p></div>
+   <div class="badges"><span class="badge good">FPGA ONLINE</span><span class="badge red">TEACHER DISCONNECTED</span><span class="badge blue">SESSION B-0142</span></div>
+  </header>
+
+  <section class="kpis">
+   <div class="kpi"><span>Mode</span><b>AFTER-TRAIN</b><small>Inference only</small></div>
+   <div class="kpi"><span>Learn</span><b style="color:#ff9ca4">OFF</b><small>No weight writes</small></div>
+   <div class="kpi"><span>Freeze</span><b style="color:#75e7aa">ON</b><small>64 weights locked</small></div>
+   <div class="kpi"><span>Teacher</span><b style="color:#ff9ca4">OFF</b><small>Disconnected</small></div>
+   <div class="kpi"><span>Accuracy</span><b style="color:#75e7aa">93.8%</b><small>Held-out prompts</small></div>
+   <div class="kpi"><span>Source</span><b>FPGA</b><small>COM8 · 115200</small></div>
+  </section>
+
+  <section class="workspace">
+   <div class="chat">
+    <div class="panel-head"><div><b>Cuộc trò chuyện kiểm thử</b><small>  ·  response provenance bắt buộc</small></div><span class="badge good">FROZEN MODEL</span></div>
+    <div class="chat-body" id="chat">
+     <div class="msg user">Xin chào</div>
+     <div class="msg bot">Chào bạn, rất vui được nói chuyện với bạn.<div class="meta">Nguồn: <b>FPGA inference</b> · external teacher: OFF · confidence: 0.94</div></div>
+     <div class="msg user">Bạn có đang học thêm từ câu tôi vừa nói không?</div>
+     <div class="msg bot">Không. Trọng số đang bị đóng băng trong chế độ đánh giá sau huấn luyện.<div class="meta">Nguồn: <b>FPGA inference</b> · learn=0 · freeze=1</div></div>
+     <div class="msg user">Tạm biệt</div>
+     <div class="msg bot">Tạm biệt, hẹn gặp lại.<div class="meta">Nguồn: <b>FPGA inference</b> · route=R6 · confidence: 0.91</div></div>
+    </div>
+    <div class="composer"><input id="input" placeholder="Nhập câu kiểm thử mới..."/><button id="send">Gửi</button></div>
+   </div>
+
+   <div class="graph">
+    <div class="panel-head"><div><b>8-Agent inference graph</b><small>  ·  edge = learned association</small></div><span class="badge good">64 SYNAPSES FROZEN</span></div>
+    <div class="graph-body">
+      <div class="node fpga" style="left:18px;top:190px"><b>Basys 3</b>XC7A35T</div>
+      <div class="node" style="left:145px;top:190px"><b>UART</b>COM8</div>
+      <div class="node agent" style="left:260px;top:45px"><b>A0</b>activity 0.72</div>
+      <div class="node agent" style="left:260px;top:110px"><b>A1</b>activity 0.34</div>
+      <div class="node agent" style="left:260px;top:175px"><b>A2</b>activity 0.81</div>
+      <div class="node agent" style="left:260px;top:240px"><b>A3</b>activity 0.09</div>
+      <div class="node agent" style="left:260px;top:305px"><b>A4</b>activity 0.66</div>
+      <div class="node agent" style="left:260px;top:370px"><b>A5</b>activity 0.41</div>
+      <div class="node agent" style="left:260px;top:435px"><b>A6</b>activity 0.93</div>
+      <div class="node agent" style="left:260px;top:500px"><b>A7</b>activity 0.28</div>
+      <div class="node syn pass" style="right:25px;top:205px"><b>Response Basin</b>learned pattern</div>
+      <div class="legend">Teacher OFF · Learn OFF · Freeze ON</div>
+    </div>
+   </div>
+  </section>
+ </main>
+
+ <aside class="inspector">
+   <h2>After-Train Proof</h2>
+   <div class="card">
+    <h3>Runtime invariants</h3>
+    <div class="row"><span>Teacher connection</span><b class="ok">DISCONNECTED</b></div>
+    <div class="row"><span>Learn enable</span><b class="ok">0</b></div>
+    <div class="row"><span>Freeze</span><b class="ok">1</b></div>
+    <div class="row"><span>Weight writes</span><b class="ok">0</b></div>
+    <div class="row"><span>External LLM calls</span><b class="ok">0</b></div>
+   </div>
+   <div class="card">
+    <h3>Current session</h3>
+    <div class="row"><span>Session</span><b>B-0142</b></div>
+    <div class="row"><span>Training samples</span><b>640</b></div>
+    <div class="row"><span>Epochs</span><b>10</b></div>
+    <div class="row"><span>Held-out accuracy</span><b class="ok">93.8%</b></div>
+    <div class="row"><span>Reset-erases test</span><b class="ok">PASS</b></div>
+    <div class="row"><span>Blind remap test</span><b class="ok">PASS</b></div>
+   </div>
+   <div class="card">
+    <h3>Selected response</h3>
+    <div class="row"><span>Encoded input</span><b>0xA5…</b></div>
+    <div class="row"><span>Response code</span><b>0x69…</b></div>
+    <div class="row"><span>Dominant basin</span><b>R6</b></div>
+    <div class="row"><span>Confidence</span><b class="ok">0.94</b></div>
+    <div class="row"><span>Decoder</span><b>local codec</b></div>
+   </div>
+   <div class="proof"><b>GENUINE AFTER-TRAIN CHECK</b><br/>Nếu câu trả lời đúng trong khi teacher/LLM đã bị ngắt và weights bị freeze, câu trả lời được quy cho trạng thái đã học trên FPGA.</div>
+ </aside>
+</div>
+<script>
+const box=document.getElementById('chat'), inp=document.getElementById('input');
+document.getElementById('send').onclick=()=>{
+ const t=inp.value.trim(); if(!t)return;
+ box.insertAdjacentHTML('beforeend',`<div class="msg user">${t}</div>`);
+ box.insertAdjacentHTML('beforeend',`<div class="msg bot">[Mockup] FPGA trả về response code đã học; decoder local chuyển thành câu hiển thị.<div class="meta">Nguồn: <b>FPGA inference</b> · teacher=OFF · learn=OFF · freeze=ON</div></div>`);
+ inp.value=''; box.scrollTop=box.scrollHeight;
+};
+</script>
+</body>
+</html>

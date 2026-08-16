@@ -1,0 +1,48 @@
+{
+  "pass": true,
+  "gates": {
+    "p1_only_hits_r1": true,
+    "p1_only_p2_misses": true,
+    "both_p1_is_r1": true,
+    "both_p2_is_r1": true,
+    "distractor_not_r1": true,
+    "forget_not_r1": true,
+    "remap_p1_is_r2": true,
+    "remap_p2_is_r2": true,
+    "remap_not_old_r1": true
+  },
+  "outs": {
+    "P1_ONLY_P1": 136,
+    "P1_ONLY_P2": 0,
+    "BOTH_P1": 136,
+    "BOTH_P2": 136,
+    "DISTRACTOR": 119,
+    "FORGET": 0,
+    "REMAP_P1": 204,
+    "REMAP_P2": 204
+  },
+  "expected": {
+    "R1": 136,
+    "R2": 204,
+    "tokens": {
+      "P1": [
+        80,
+        90,
+        238
+      ],
+      "P2": [
+        141,
+        34,
+        204
+      ],
+      "D": [
+        120,
+        201,
+        119
+      ]
+    }
+  },
+  "gold_pass": true,
+  "bitstream": "basys3_eight_agent_m8hw04.bit",
+  "claim": "PHRASE_BASIN_ASSOCIATION_BOARD_VALIDATED"
+}

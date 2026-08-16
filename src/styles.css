@@ -1,0 +1,202 @@
+@import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
+
+@theme {
+  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-canvas: #09090b;
+  --color-surface: #111114;
+  --color-elevated: #18181c;
+  --color-panel: #141418;
+  --color-ink: #ecece8;
+  --color-mute: #8b8b86;
+  --color-faint: #5c5c58;
+  --color-line: #2a2a2e;
+  --color-line-strong: #3a3a40;
+  --color-steel: #c4c8ce;
+  --color-steel-fg: #0c0c0e;
+  --color-pass: #6d9a7c;
+  --color-fail: #c45c4a;
+  --color-warn: #c4a15a;
+  --color-live: #7a9e8c;
+  --color-spike: #d6ddd8;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --shadow-panel: 0 12px 40px -20px rgb(0 0 0 / 0.65);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100%;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-steel);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.react-flow {
+  --xy-background-color: var(--color-canvas);
+  --xy-node-border-radius: var(--radius-md);
+  --xy-node-boxshadow-hover: none;
+  --xy-node-boxshadow-selected: none;
+  background: var(--color-canvas);
+}
+
+.react-flow__background pattern circle {
+  fill: var(--color-line);
+}
+
+.react-flow__minimap {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-line) !important;
+  border-radius: var(--radius-sm) !important;
+  overflow: hidden;
+}
+
+.react-flow__controls {
+  border: 1px solid var(--color-line) !important;
+  border-radius: var(--radius-sm) !important;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+
+.react-flow__controls-button {
+  background: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-line) !important;
+  fill: var(--color-ink) !important;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--color-elevated) !important;
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__node {
+  font-family: var(--font-sans);
+}
+
+.react-flow__edge-path,
+.react-flow__connection-path {
+  stroke: var(--color-line-strong);
+}
+
+.react-flow__handle {
+  width: 7px;
+  height: 7px;
+  background: var(--color-line-strong);
+  border: 1px solid var(--color-mute);
+}
+
+.spike-bead {
+  fill: var(--color-spike);
+  offset-rotate: 0deg;
+  animation: bead-travel 720ms linear forwards;
+}
+
+@keyframes bead-travel {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.agent-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 1px solid var(--color-live);
+  animation: pulse-ring 700ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+  pointer-events: none;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-pass);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-pass) 70%, transparent);
+  animation: live-breathe 1.8s ease-out infinite;
+}
+
+.live-dot[data-off="true"] {
+  background: var(--color-faint);
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes live-breathe {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-pass) 50%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
