@@ -41,7 +41,7 @@ export function ResultsBoard() {
           <p className="text-xs text-mute">
             {BOARD.part} · {BOARD.device} · {BOARD.uart} · Vivado {BOARD.vivado}
           </p>
-          <p className="text-xs text-mute">Next: {NEXT_MILESTONE} — Teacher OFF · Learn OFF · Freeze ON</p>
+          <p className="text-xs text-mute">{NEXT_MILESTONE}. Not an LLM / open-domain chat.</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -137,7 +137,7 @@ export function ResultsBoard() {
           M8-HW-05 probe · run_001 · same m8hw04.bit · COM8
         </div>
         <p className="mt-1 text-xs text-mute">
-          Host encoder salt=0. FPGA không thấy chuỗi. Teacher dùng trong TRAIN. Conversation chưa claim.
+          Host encoder salt=0. FPGA không thấy chuỗi. Teacher chỉ trong TRAIN. 06A/06B AFTER đã đóng.
         </p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full border-collapse text-left font-mono text-[11px]">

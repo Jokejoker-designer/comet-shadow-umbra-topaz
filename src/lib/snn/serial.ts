@@ -1,5 +1,6 @@
 import { FrameScanner, decodeAny, parseUartLine, pulseFromFrames } from "./parse-uart";
 import { useLab } from "./store";
+import { bindSerialWritable, releaseSerialWriter } from "./uart-io";
 
 type SerialPortLike = {
   open: (opts: { baudRate: number }) => Promise<void>;
@@ -15,7 +16,11 @@ export function hasWebSerial(): boolean {
   return typeof navigator !== "undefined" && Boolean((navigator as Navigator & { serial?: SerialNav }).serial);
 }
 
-let activePort: SerialPortLike | null = null;
+type SerialPortRW = SerialPortLike & {
+  writable?: WritableStream<Uint8Array> | null;
+};
+
+let activePort: SerialPortRW | null = null;
 let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 let session = 0;
 
@@ -37,6 +42,7 @@ async function releaseReader() {
 export async function disconnectWebSerial() {
   session += 1;
   await releaseReader();
+  releaseSerialWriter();
   const port = activePort;
   activePort = null;
   try {
@@ -68,6 +74,7 @@ export async function connectWebSerial(baudRate = 115200) {
   }
   if (session !== my) return;
   activePort = port;
+  bindSerialWritable(() => activePort?.writable ?? null);
   useLab.getState().attachBoard("COM8", baudRate);
   const stream = port.readable;
   if (!stream) {

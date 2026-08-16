@@ -1,7 +1,8 @@
 import { encodeTokens, lexicalize } from "./phrase";
 
-export const CHAT_PROBE = 0x64;
-export const CHAT_RESULT = 0x65;
+/** Silicon AFTER uses A5 63 probe + A5 64 event (see uart.ts). These names are leftover aliases. */
+export const CHAT_PROBE = 0x63;
+export const CHAT_RESULT = 0x64;
 export const SYNC0 = 0xa5;
 
 export type AfterFlags = {

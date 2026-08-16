@@ -4,6 +4,8 @@ import { inferOutput } from "./codec";
 import { makeResponse, type ResponseObject } from "./chat-protocol";
 import { encodeTokens, inferAfterTurns } from "./phrase";
 import { blankFrame } from "./parse-uart";
+import { writeSerial } from "./uart-io";
+import { CMD_T_CLEAR, commandFrame, temporalProbeFrame } from "./uart";
 import { antiHardcode } from "./scorecard";
 import { clone8, MATRIX_A, MATRIX_B, MATRIX_RESET } from "./board-record";
 import { SESSION_A_MAP, SESSION_B_MAP, cloneMatrix, cyclicScore, mappingHash } from "./research";
@@ -69,6 +71,7 @@ type LabState = {
   requestId: number;
   responses: ResponseObject[];
   lastResponse: ResponseObject | null;
+  pendingChat: { id: number; input: string; turns: string[]; t0: number } | null;
   chat: Array<{ role: "user" | "bot"; text: string; meta: string }>;
   experiments: Experiment[];
   setScreen: (s: Screen) => void;
@@ -104,6 +107,54 @@ type LabState = {
 
 const LOG_CAP = 280;
 const SNAP_CAP = 180;
+
+function applyChatReply(
+  set: (p: Partial<LabState>) => void,
+  get: () => LabState,
+  opts: { id: number; raw: string; turns: string[]; basin: number; ctx: number; t0: number; via: "board" | "replay" },
+) {
+  const tokens = encodeTokens(opts.raw);
+  const flags = {
+    teacher: false,
+    learn: false,
+    freeze: true,
+    weightWrites: 0,
+    responseValid: true,
+    fpgaSource: opts.via === "board",
+  };
+  const resp = makeResponse({
+    requestId: opts.id,
+    input: opts.raw,
+    basin: opts.basin,
+    ctx: opts.ctx,
+    flags,
+    latencyMs: Math.max(0.4, performance.now() - opts.t0),
+  });
+  if (opts.via === "replay") {
+    resp.reason = "offline replay of silicon law (not LLM) · connect COM8 for live A5 64";
+  }
+  const user = { role: "user" as const, text: opts.raw, meta: `req #${opts.id} · turn ${opts.turns.length} · ${opts.via}` };
+  const bot = {
+    role: "bot" as const,
+    text: resp.text,
+    meta: `basin 0x${resp.fpga_response.toString(16).padStart(2, "0")} · ${resp.gate} · ${opts.via}`,
+  };
+  set({
+    requestId: opts.id,
+    holdTurns: opts.turns,
+    pendingChat: null,
+    lastResponse: resp,
+    responses: [...get().responses, resp].slice(-40),
+    lastProbe: {
+      input: opts.raw,
+      inCode: tokens[0],
+      outCode: resp.fpga_response,
+      basin: resp.fpga_response === 0 ? "NONE" : "SEMANTIC",
+    },
+    chat: [...get().chat, user, bot],
+    llmAfter: 0,
+  });
+}
 
 function capture(frame: UartFrame): Snapshot {
   return {
@@ -156,6 +207,7 @@ export const useLab = create<LabState>((set, get) => ({
   requestId: 141,
   responses: [],
   lastResponse: null,
+  pendingChat: null,
   chat: [],
   experiments: [],
 
@@ -193,6 +245,18 @@ export const useLab = create<LabState>((set, get) => ({
     }
     const weights = frame.weights.map((r) => r.slice());
     const counts = frame.updateCounts.map((r) => r.slice());
+    const pending = get().pendingChat;
+    if (frame.kind === "temp" && pending) {
+      applyChatReply(set, get, {
+        id: pending.id,
+        raw: pending.input,
+        turns: pending.turns,
+        basin: frame.output,
+        ctx: frame.ctx ?? 0,
+        t0: pending.t0,
+        via: "board",
+      });
+    }
     const { src, dst } = selectedPair(nextSw);
     if (frame.kind === "live") {
       weights[dst][src] = frame.weight;
@@ -331,53 +395,37 @@ export const useLab = create<LabState>((set, get) => ({
     const raw = text.trim();
     if (!raw) return;
     const t0 = performance.now();
-    const s = get();
+    let s = get();
     const id = s.requestId + 1;
     if (!s.afterArmed) {
       get().armAfterTrain();
       s = { ...get(), holdTurns: [] };
     }
-    const after = true;
     const turns = [...s.holdTurns, raw];
+    const tokens = encodeTokens(raw);
+    const commit = (basin: number, ctx: number, via: "board" | "replay") =>
+      applyChatReply(set, get, { id, raw, turns, basin, ctx, t0, via });
+
+    if (s.source === "board") {
+      set({ pendingChat: { id, input: raw, turns, t0 } });
+      void writeSerial(temporalProbeFrame(tokens, turns.length > 1)).then((ok) => {
+        if (!ok) {
+          const inferred = inferAfterTurns(turns);
+          commit(inferred.basin, inferred.ctx, "replay");
+          return;
+        }
+        window.setTimeout(() => {
+          const still = get().pendingChat;
+          if (still && still.id === id) {
+            const inferred = inferAfterTurns(turns);
+            commit(inferred.basin, inferred.ctx, "replay");
+          }
+        }, 800);
+      });
+      return;
+    }
     const inferred = inferAfterTurns(turns);
-    const basin = inferred.basin;
-    const flags = {
-      teacher: false,
-      learn: false,
-      freeze: true,
-      weightWrites: 0,
-      responseValid: true,
-      fpgaSource: true,
-    };
-    const resp = makeResponse({
-      requestId: id,
-      input: raw,
-      basin,
-      ctx: inferred.ctx,
-      flags,
-      latencyMs: Math.max(0.4, performance.now() - t0),
-    });
-    const tok = encodeTokens(raw);
-    const user = { role: "user" as const, text: raw, meta: `req #${id} · turn ${turns.length} · hold_ctx=${inferred.ctx}` };
-    const bot = {
-      role: "bot" as const,
-      text: resp.text,
-      meta: `basin 0x${resp.fpga_response.toString(16).padStart(2, "0")} · ${resp.gate} · ${resp.reason}`,
-    };
-    set({
-      requestId: id,
-      holdTurns: turns,
-      lastResponse: resp,
-      responses: [...s.responses, resp].slice(-40),
-      lastProbe: {
-        input: raw,
-        inCode: tok[0],
-        outCode: resp.fpga_response,
-        basin: resp.fpga_response === 0 ? "NONE" : "SEMANTIC",
-      },
-      chat: [...s.chat, user, bot],
-      llmAfter: 0,
-    });
+    commit(inferred.basin, inferred.ctx, "replay");
   },
 
   armAfterTrain: () => {
@@ -390,13 +438,15 @@ export const useLab = create<LabState>((set, get) => ({
       updates: Math.max(get().frame.updates, 1024),
       line: "AFTER-TRAIN · HW-06B hold_ctx · teacher=0 learn=0 freeze=1 writes=0",
     };
-    set({ frame, afterArmed: true, mode: "paused", holdTurns: [] });
+    set({ frame, afterArmed: true, mode: "paused", holdTurns: [], pendingChat: null });
   },
 
   resetCtx: () => {
+    if (get().source === "board") void writeSerial(commandFrame(CMD_T_CLEAR));
     set({
       holdTurns: [],
       lastResponse: null,
+      pendingChat: null,
     });
   },
 

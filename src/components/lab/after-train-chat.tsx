@@ -22,7 +22,7 @@ export function AfterTrainChat() {
       <div className="flex min-h-0 flex-col">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">FPGA AI Chat</div>
+            <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">After-train (06B)</div>
             <div className="text-sm font-medium tracking-tight">M8-HW-06B · AFTER · hold_ctx</div>
           </div>
           <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
@@ -57,7 +57,7 @@ export function AfterTrainChat() {
                 {r.input}
               </div>
               <div className="max-w-[85%] rounded-sm border border-line bg-surface px-3 py-2 text-sm">
-                <div className="text-[10px] uppercase tracking-wider text-faint">FPGA AI</div>
+                <div className="text-[10px] uppercase tracking-wider text-faint">FPGA out · local decoder</div>
                 <div>{r.text}</div>
                 <div className="mt-1 font-mono text-[10px] text-faint">
                   basin 0x{r.fpga_response.toString(16).padStart(2, "0")} · ctx {r.temporal_context} · {r.latency_ms.toFixed(1)} ms · #{r.request_id}
@@ -133,10 +133,10 @@ function LcdFace({ last, turns }: { last: ResponseObject | null; turns: string[]
   return (
     <div className="border border-line bg-canvas p-2 font-mono text-[11px]">
       <div className="mb-2 text-[10px] uppercase tracking-wider text-faint">SPI LCD · same object</div>
-      <div className="text-pass">FPGA AI ONLINE</div>
+      <div className="text-pass">AFTER · TEACHER OFF</div>
       <div className="mt-2 text-mute">YOU:</div>
       <div>{last ? asciiLcd(last.input) : "—"}</div>
-      <div className="mt-2 text-mute">AI:</div>
+      <div className="mt-2 text-mute">OUT:</div>
       <div>{last ? asciiLcd(last.text) : "—"}</div>
       <div className="mt-2 text-faint">
         FPGA [0x{(last?.fpga_response ?? 0).toString(16).padStart(2, "0")}] turns {turns.length}

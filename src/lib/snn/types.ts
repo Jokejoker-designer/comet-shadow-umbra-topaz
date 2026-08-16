@@ -22,7 +22,8 @@ export type Screen =
   | "board";
 
 export type UartFrame = {
-  kind: "live" | "result";
+  kind: "live" | "result" | "temp";
+  ctx: number;
   tick: number;
   updates: number;
   mismatch: number;

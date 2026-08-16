@@ -1,4 +1,4 @@
-/** Host encoder/decoder only. Does not decide the FPGA response. */
+/** Cyclic route-gate helpers. Do NOT use CURRICULUM for AFTER-TRAIN replies. */
 
 export type Phrase = {
   prompts: string[];

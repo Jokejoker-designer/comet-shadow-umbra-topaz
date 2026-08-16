@@ -14,11 +14,11 @@ export const SW_LABEL = [
   "SRC1",
   "SRC2",
   "FRZ",
-  "—",
+  "REMAP",
   "AUTO",
-  "—",
+  "DENSE",
   "DST0",
-  "DST1",
+  "TEMP",
   "DST2",
 ];
 
@@ -32,12 +32,12 @@ export const SW_HINT = [
   "Inspect src bit 0 · SW11 OFF: source bit 6",
   "Inspect src bit 1 · SW11 OFF: source bit 7",
   "Inspect src bit 2 (cfg_src[2]). SW11 OFF: manual LEARN. AUTO: không phải learn.",
-  "Freeze override (AUTO) / freeze (manual). UART freeze bit ≠ paddle này.",
-  "Không dùng trong AUTO",
-  "AUTO / supervisor. UART flags[6] = sw[11] thật.",
-  "Không dùng",
-  "Inspect dest bit 0 — dest = SW15:13",
-  "Inspect dest bit 1",
+  "Freeze override (AUTO). UART freeze bit ≠ paddle này.",
+  "OFF cho dense/temporal (cyclic vs remap).",
+  "AUTO / cyclic enable. 06B temporal arm bằng A5 62 (SW11 không bắt buộc).",
+  "Dense mode (hoặc A5 60).",
+  "Inspect dest bit 0 — dest = SW15:13. 03/04/05/06 OFF.",
+  "Temporal mode (hoặc A5 62).",
   "Inspect dest bit 2",
 ];
 
@@ -130,6 +130,6 @@ export const DEMO_STEPS = [
   "SW8:6 = inspect src. src=0 ⇒ SW8 SW7 SW6 đều OFF. SW8 không phải LEARN.",
   "SW15:13 = inspect dest. W[1][0] ⇒ chỉ SW13 ON.",
   "SW11 ON + BTNU. LEARN = LED13, FREEZE = LED12 (supervisor), SW9 chỉ là override.",
-  "HOLD: LED12 sáng, LED7:0 đi 01 02 04 08 10 20 40 80. 7-seg 0440.",
-  "Không gạt SW11 để train lại. BTNU nếu muốn reset.",
+  "HOLD cyclic: LED12 sáng, LED7:0 01…80, 7-seg 0440.",
+  "06B: nạp m8hw06b.bit, SW10 OFF, Connect COM8, ARM AFTER, gửi 3 lượt Quân/chào/hỏi tên.",
 ];

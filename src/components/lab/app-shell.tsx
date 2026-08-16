@@ -26,7 +26,7 @@ const NAV: { id: Screen; label: string }[] = [
   { id: "cockpit", label: "Training LIVE" },
   { id: "agents", label: "Agent Graph" },
   { id: "matrix", label: "64-Weight" },
-  { id: "chat", label: "FPGA AI Chat" },
+  { id: "chat", label: "After-train" },
   { id: "timeline", label: "Timeline" },
   { id: "proof", label: "Anti-Hardcode" },
   { id: "sessions", label: "Sessions A/B" },
@@ -138,7 +138,7 @@ export function AppShell() {
           ["Tick / upd", `${frame.tick} / ${frame.updates}`],
           ["Cyclic route", cyc.line],
           ["Phrase basin", "0x88 R1 · HW-05"],
-          ["Conversation", "simple multi-turn PASS"],
+          ["06B multi-turn", "PASS · not LLM"],
           ["Learn / freeze", `${frame.learn ? "ON" : "off"} / ${frame.freeze ? "ON" : "off"}`],
           ["LLM T / A", `${llmTrain} / ${llmAfter}`],
         ].map(([k, v]) => (

@@ -1,9 +1,10 @@
 import { emptyCounts, emptyWeights, phaseFromSup, type Phase, type UartFrame } from "./types";
+import { FRAME_LEN, KIND_LIVE, KIND_RESULT, KIND_TEMP_EVENT, SOF, UART_KINDS, parseTempEvent } from "./uart";
 
-export const FRAME_LEN = 15;
-export const SYNC0 = 0xa5;
-export const LIVE1 = 0x5a;
-export const RESULT1 = 0x5c;
+export { FRAME_LEN };
+export const SYNC0 = SOF;
+export const LIVE1 = KIND_LIVE;
+export const RESULT1 = KIND_RESULT;
 
 function signed16(lo: number, hi: number): number {
   const v = lo | (hi << 8);
@@ -20,6 +21,7 @@ export function checksumOk(bytes: Uint8Array): boolean {
 export function blankFrame(): UartFrame {
   return {
     kind: "live",
+    ctx: 0,
     tick: 0,
     updates: 0,
     mismatch: 0,
@@ -127,9 +129,7 @@ export class FrameScanner {
     for (const b of chunk) this.buf.push(b);
     const frames: Uint8Array[] = [];
     while (this.buf.length >= FRAME_LEN) {
-      const i = this.buf.findIndex(
-        (v, idx) => v === SYNC0 && (this.buf[idx + 1] === LIVE1 || this.buf[idx + 1] === RESULT1),
-      );
+      const i = this.buf.findIndex((v, idx) => v === SYNC0 && UART_KINDS.has(this.buf[idx + 1] ?? -1));
       if (i < 0) {
         this.buf = this.buf.slice(-1);
         break;
@@ -148,9 +148,25 @@ export class FrameScanner {
   }
 }
 
+export function decodeTemp(bytes: Uint8Array, prev: UartFrame): UartFrame | null {
+  const ev = parseTempEvent(bytes);
+  if (!ev) return null;
+  return {
+    ...prev,
+    kind: "temp",
+    output: ev.out,
+    teacher: ev.target,
+    ctx: ev.ctx,
+    learn: false,
+    line: `TEMP ctx=${ev.ctx} out=0x${ev.out.toString(16).padStart(2, "0")} tgt=0x${ev.target.toString(16).padStart(2, "0")} match=${ev.match ? 1 : 0}`,
+  };
+}
+
 export function decodeAny(raw: Uint8Array, prev: UartFrame): UartFrame | null {
+  if (raw[1] === KIND_TEMP_EVENT) return decodeTemp(raw, prev);
   if (raw[1] === RESULT1) return decodeResult(raw, prev);
-  return decodeLive(raw, prev);
+  if (raw[1] === LIVE1) return decodeLive(raw, prev);
+  return null;
 }
 
 export function pulseFromFrames(prev: UartFrame, next: UartFrame): { src: number; dst: number } | undefined {
@@ -177,6 +193,7 @@ export function parseUartLine(line: string, prev: UartFrame): UartFrame | null {
   return {
     ...prev,
     kind: t.startsWith("RESULT") ? "result" : "live",
+    ctx: prev.ctx,
     tick: num("tick", prev.tick),
     updates: num("updates", prev.updates),
     mismatch: num("mismatch", prev.mismatch),

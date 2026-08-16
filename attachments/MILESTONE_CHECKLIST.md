@@ -158,20 +158,41 @@ Same bitstream as 04: `basys3_eight_agent_m8hw04.bit` `DEEFE548…`. No rebuild.
 
 ---
 
-## M8-HW-06 — after-train simple conversation
+## M8-HW-06A — teacher-free single-turn interaction
 
-Blocked until M8-HW-05.
+Contract: `docs/M8-HW-06A_TEACHER_FREE_CONTRACT.md`  
+Same bitstream as 04/05: `basys3_eight_agent_m8hw04.bit` `DEEFE548…`. No rebuild.
 
-- [ ] TRAIN may use external teacher
-- [ ] AFTER: Teacher OFF, External LLM call count = 0, Learn OFF, Freeze ON, weight writes = 0
-- [ ] Response source = FPGA
-- [ ] Chat UI shows those flags
-- [ ] Only then: simple learned conversation evidence
+- [x] TRAIN uses external teacher on phrase examples
+- [x] AFTER hard switch: Teacher OFF, External LLM = 0, Learn OFF, Freeze ON, weight writes = 0
+- [x] `xin chào` → host encoder → FPGA → R1 → local decoder → `chào bạn`
+- [x] `hello` (same basin) also decodes to `chào bạn`
+- [x] Distractor does not
+- [x] DUMP SHA before AFTER infer == after (`5452F2B6…`)
+- [x] UI / transcript shows provenance flags
+- [x] Claim: `TEACHER_FREE_AFTER_TRAIN_SIMPLE_INTERACTION_BOARD_VALIDATED`
+
+**Not claimed:** conversation, multi-turn, name memory.
+
+---
+
+## M8-HW-06B — multi-turn context
+
+Contract: `docs/M8-HW-06B_MULTI_TURN_CONTRACT.md`  
+Bit: `basys3_eight_agent_m8hw06b.bit` `7CE3238E…` (04 `DEEFE548…` not overwritten)
+
+- [x] Turn 3 depends on earlier FPGA ctx (`hold_ctx`)
+- [x] RESET ctx, then only `Tôi tên gì?` → empty
+- [x] Change name Quân ↔ Lan → decode changes
+- [x] Permuted order → not Quân
+- [x] AFTER: Teacher OFF, LLM 0, Learn OFF, Freeze ON, W SHA frozen
+- [x] Claim: `SIMPLE_LEARNED_MULTI_TURN_CONVERSATION_BOARD_VALIDATED`
+
+Not an LLM. Not open-domain chat.
 
 ---
 
 ## Current pointer
 
-**NOW:** M8-HW-05 **BOARD PASS**.
-**NEXT:** M8-HW-06 after-train simple conversation (Teacher OFF, Learn OFF, Freeze ON, FPGA source).
-Do not claim conversation until M8-HW-06 those AFTER flags are on silicon and in the UI.
+**NOW:** M8-HW-06B **BOARD PASS**.
+Ladder 01→02→03→03R→04→05→06A→06B is closed on silicon.
