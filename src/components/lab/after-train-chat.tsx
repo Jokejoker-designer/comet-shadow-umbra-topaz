@@ -22,7 +22,7 @@ export function AfterTrainChat() {
       <div className="flex min-h-0 flex-col">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">After-train (06B)</div>
+            <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">After-train (06B) · LM-05 is a separate bit</div>
             <div className="text-sm font-medium tracking-tight">M8-HW-06B · AFTER · hold_ctx</div>
           </div>
           <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">

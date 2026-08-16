@@ -132,4 +132,5 @@ export const DEMO_STEPS = [
   "SW11 ON + BTNU. LEARN = LED13, FREEZE = LED12 (supervisor), SW9 chỉ là override.",
   "HOLD cyclic: LED12 sáng, LED7:0 01…80, 7-seg 0440.",
   "06B: nạp m8hw06b.bit, SW10 OFF, Connect COM8, ARM AFTER, gửi 3 lượt Quân/chào/hỏi tên.",
+  "LM-05: nạp basys3_lm05.bit (không đè bit 06B). Mọi SW tắt. UART COM10. 7-seg 05xx.",
 ];

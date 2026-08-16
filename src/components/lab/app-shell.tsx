@@ -73,12 +73,12 @@ export function AppShell() {
       <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line px-3 py-1.5 md:px-4">
         <div className="min-w-0">
           <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-faint">FPGA Learning Graph</div>
-          <div className="truncate text-sm font-medium tracking-tight">M8-HW-06B PASS · Basys3 · COM8</div>
+          <div className="truncate text-sm font-medium tracking-tight">M8-LM-05 PASS · Basys 3 last gate · COM10</div>
         </div>
         <SevenSeg value={frame.weight} />
         <div className="ml-auto flex flex-wrap items-center gap-2 font-mono text-[11px] tabular-nums text-mute">
           <span>
-            {source === "board" ? (rxBytes ? `COM8 LIVE · ${rxBytes} B` : "COM8 im lặng · SW11+BTNU") : source === "sim" ? "GIẢ LẬP" : "CHƯA NỐI"}
+            {source === "board" ? (rxBytes ? `UART LIVE · ${rxBytes} B` : "UART im lặng · SW tắt") : source === "sim" ? "GIẢ LẬP" : "CHƯA NỐI"}
           </span>
           <span>S{session.name}</span>
           <span className={frame.learn ? "text-warn" : "text-pass"}>{phaseLabel(frame.phase)}</span>
@@ -90,7 +90,7 @@ export function AppShell() {
         <div className="flex flex-wrap items-center gap-1">
           <Button size="sm" variant={source === "board" ? "default" : "outline"} onClick={() => setConnectOpen(true)}>
             <Radio className="size-3.5" />
-            COM8
+            UART
           </Button>
           <Button size="sm" variant="outline" onClick={resetWeights}>
             RESET

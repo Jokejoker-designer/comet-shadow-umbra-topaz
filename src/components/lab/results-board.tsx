@@ -1,5 +1,5 @@
 import { BITS, BOARD, KIT_ID, MATRIX_A, MATRIX_B, MATRIX_RESET } from "@/lib/snn/board-record";
-import { HW05_PROBES, HW06B_PROBES, MILESTONES, MILESTONE, MILESTONE_CLAIM, NEXT_MILESTONE } from "@/lib/snn/research";
+import { HW05_PROBES, HW06B_PROBES, LM05_PROBES, MILESTONES, MILESTONE, MILESTONE_CLAIM, NEXT_MILESTONE } from "@/lib/snn/research";
 import { useLab } from "@/lib/snn/store";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +68,11 @@ export function ResultsBoard() {
             ["HW-03 dense", BITS.hw03],
             ["HW-04/05/06A", BITS.hw04],
             ["HW-06B multi-turn", BITS.hw06b],
+            ["LM-01 token AR", BITS.lm01],
+            ["LM-02 tiny LM", BITS.lm02],
+            ["LM-03 causal GPT", BITS.lm03],
+            ["LM-04 head SGD", BITS.lm04],
+            ["LM-05 full backprop", BITS.lm05],
           ] as const
         ).map(([label, b]) => (
           <div key={b.file} className="border border-line bg-surface px-2 py-2">
@@ -151,6 +156,37 @@ export function ResultsBoard() {
             </thead>
             <tbody>
               {HW05_PROBES.map((p) => (
+                <tr key={p.probe} className="border-b border-line">
+                  <td className="py-2 pr-3">{p.probe}</td>
+                  <td className="py-2 pr-3 tabular-nums">{p.out}</td>
+                  <td className="py-2 pr-3 text-mute">{p.expect}</td>
+                  <td className="py-2 text-pass">PASS</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-4 border border-line bg-surface p-3">
+        <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">
+          M8-LM-05 board · run_001 · basys3_lm05.bit · COM10 · dumpz CE
+        </div>
+        <p className="mt-1 text-xs text-mute">
+          Tiled SGD mọi tensor chính. CE đo từ logits FPGA (cmd 1 + dumpz 0x75), không phải last_loss giữa TRAIN. SW0 AFTER. Không phải LLM.
+        </p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full border-collapse text-left font-mono text-[11px]">
+            <thead>
+              <tr className="border-b border-line text-faint">
+                <th className="py-2 pr-3 font-medium">Gate</th>
+                <th className="py-2 pr-3 font-medium">FPGA</th>
+                <th className="py-2 pr-3 font-medium">Expect</th>
+                <th className="py-2 font-medium">Gate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LM05_PROBES.map((p) => (
                 <tr key={p.probe} className="border-b border-line">
                   <td className="py-2 pr-3">{p.probe}</td>
                   <td className="py-2 pr-3 tabular-nums">{p.out}</td>

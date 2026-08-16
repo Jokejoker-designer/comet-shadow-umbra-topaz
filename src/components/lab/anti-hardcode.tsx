@@ -15,6 +15,12 @@ const CHAIN: { id: string; label: string; status: "pass" | "next" }[] = [
   { id: "phrase", label: "M8-HW-05 phrase basin 0x88", status: "pass" },
   { id: "06a", label: "M8-HW-06A teacher-free AFTER", status: "pass" },
   { id: "06b", label: "M8-HW-06B Quân/Lan hold_ctx", status: "pass" },
+  { id: "lm00", label: "M8-LM-00 LEGACY freeze SHA", status: "pass" },
+  { id: "lm01", label: "M8-LM-01 token AR 100/100", status: "pass" },
+  { id: "lm02", label: "M8-LM-02 tiny LM 1000/1000", status: "pass" },
+  { id: "lm03", label: "M8-LM-03 causal GPT forward", status: "pass" },
+  { id: "lm04", label: "M8-LM-04 head/embed SGD 128/128", status: "pass" },
+  { id: "lm05", label: "M8-LM-05 full backprop dumpz 40.6%", status: "pass" },
   { id: "llm", label: "Open-domain LLM", status: "next" },
 ];
 
@@ -24,7 +30,7 @@ export function AntiHardcode() {
       <div>
         <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">Anti-hardcode proof</div>
         <p className="mt-1 text-xs text-mute">
-          Board 2026-08-14. Remap + phrase basin PASS. Conversation node stays pending until AFTER flags.
+          Board 2026-08-16. LEGACY 01→06B + LM-00→05 closed on silicon. Open-domain LLM stays unclaimed.
         </p>
       </div>
       <ol className="space-y-1">
@@ -38,7 +44,7 @@ export function AntiHardcode() {
         ))}
       </ol>
       <p className="text-xs text-mute">
-        Permutations / phrases không nằm trong rtl/. Teacher dùng lúc TRAIN. AFTER-TRAIN chưa claim.
+        Permutations / names / phrases không nằm trong rtl/. Teacher chỉ lúc TRAIN. AFTER writes = 0. Not an LLM.
       </p>
     </div>
   );

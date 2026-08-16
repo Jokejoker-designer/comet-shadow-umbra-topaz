@@ -1,9 +1,9 @@
 import { TARGET_W, type Phase } from "./types";
 
-export const MILESTONE = "M8-HW-06B";
-export const MILESTONE_TITLE = "SIMPLE LEARNED MULTI-TURN";
-export const MILESTONE_CLAIM = "SIMPLE_LEARNED_MULTI_TURN_CONVERSATION_BOARD_VALIDATED";
-export const NEXT_MILESTONE = "Ladder 01→06B closed · not an LLM";
+export const MILESTONE = "M8-LM-05";
+export const MILESTONE_TITLE = "FULL TINY TRANSFORMER BACKPROP";
+export const MILESTONE_CLAIM = "FULL_TINY_TRANSFORMER_BACKPROP_FPGA_BOARD_VALIDATED";
+export const NEXT_MILESTONE = "Basys 3 closed LM-00→05 · Arty is M8-LM-06 · not an LLM";
 
 export const CLAIMS = [
   { id: "cyclic", label: "CYCLIC ROUTE", state: "PASS" as const },
@@ -13,6 +13,12 @@ export const CLAIMS = [
   { id: "phrase", label: "PHRASE BASIN", state: "PASS" as const },
   { id: "after", label: "TEACHER-FREE AFTER", state: "PASS" as const },
   { id: "chat", label: "SIMPLE MULTI-TURN", state: "PASS" as const },
+  { id: "lm00", label: "LM FREEZE", state: "PASS" as const },
+  { id: "lm01", label: "TOKEN AR", state: "PASS" as const },
+  { id: "lm02", label: "TINY LM", state: "PASS" as const },
+  { id: "lm03", label: "CAUSAL GPT FWD", state: "PASS" as const },
+  { id: "lm04", label: "HEAD/EMBED SGD", state: "PASS" as const },
+  { id: "lm05", label: "FULL BACKPROP", state: "PASS" as const },
   { id: "llm", label: "OPEN-DOMAIN LLM", state: "NOT TRAINED" as const },
 ];
 
@@ -161,6 +167,108 @@ export const MILESTONES: MilestoneRecord[] = [
     ],
     notClaimed: "LLM · open-domain chat",
   },
+  {
+    id: "M8-LM-00",
+    title: "Freeze LEGACY / open LM",
+    claim: "LEGACY_BASELINE_FROZEN",
+    status: "PASS",
+    bit: "(no new bit)",
+    sha: "FROZEN SHA PASS",
+    date: "2026-08-16",
+    numbers: [
+      { k: "01–04 / 06B SHA", v: "locked in M8-HW-FROZEN.json" },
+      { k: "Names in rtl/", v: "none" },
+      { k: "Next track", v: "BUILD_PROFILE=LM" },
+    ],
+    notClaimed: "new silicon claim",
+  },
+  {
+    id: "M8-LM-01",
+    title: "8-token autoregression",
+    claim: "AUTOREGRESSIVE_TOKEN_SEQUENCE_FPGA_BOARD_VALIDATED",
+    status: "PASS",
+    bit: "basys3_eight_agent_m8lm01.bit",
+    sha: "5D80331D…ED41238E",
+    date: "2026-08-16",
+    numbers: [
+      { k: "xin / tôi chains", v: "100/100 · 100/100" },
+      { k: "RESET / remap", v: "not chain / 3,4,5,6" },
+      { k: "AFTER writes", v: "0" },
+      { k: "WNS", v: "+96.297 ns" },
+    ],
+    notClaimed: "Transformer · embeddings",
+  },
+  {
+    id: "M8-LM-02",
+    title: "Tiny LM forward",
+    claim: "TINY_AUTOREGRESSIVE_LANGUAGE_MODEL_FPGA_BOARD_VALIDATED",
+    status: "PASS",
+    bit: "basys3_lm02.bit",
+    sha: "C3C14671… (disk) · boarded B14EA3C9…",
+    date: "2026-08-16",
+    numbers: [
+      { k: "Logits", v: "1000 / 1000" },
+      { k: "Hold acc", v: "1.00" },
+      { k: "WNS", v: "+114.259 ns" },
+    ],
+    notClaimed: "attention · on-chip SGD",
+  },
+  {
+    id: "M8-LM-03",
+    title: "Causal GPT forward",
+    claim: "TINY_CAUSAL_TRANSFORMER_FORWARD_PATH_FPGA_BOARD_VALIDATED",
+    status: "PASS",
+    bit: "basys3_lm03.bit",
+    sha: "8D2AF247…208F83B0",
+    date: "2026-08-16",
+    numbers: [
+      { k: "Logits", v: "1000 / 1000" },
+      { k: "Prefix / mask / gen", v: "stable · zero · 20/20" },
+      { k: "Retrieval hold", v: "1.00" },
+      { k: "WNS", v: "+96.284 ns" },
+    ],
+    notClaimed: "on-chip gradient",
+  },
+  {
+    id: "M8-LM-04",
+    title: "Head + embed SGD",
+    claim: "ON_FPGA_GRADIENT_TRAINED_LM_HEAD_AND_EMBEDDINGS",
+    status: "PASS",
+    bit: "basys3_lm04.bit",
+    sha: "B7135153…BE5826CA",
+    date: "2026-08-16",
+    numbers: [
+      { k: "Grads", v: "128 / 128" },
+      { k: "FPGA CE drop", v: "31.03% · 464→320" },
+      { k: "QKV/FFN SHA", v: "frozen" },
+      { k: "AFTER writes", v: "0" },
+    ],
+    notClaimed: "full Transformer backprop",
+  },
+  {
+    id: "M8-LM-05",
+    title: "Full tiny Transformer backprop",
+    claim: "FULL_TINY_TRANSFORMER_BACKPROP_FPGA_BOARD_VALIDATED",
+    status: "PASS",
+    bit: "basys3_lm05.bit",
+    sha: "8657DA03…E025483",
+    date: "2026-08-16",
+    numbers: [
+      { k: "Grads", v: "128 / 128" },
+      { k: "Dumpz CE drop", v: "40.625% · 512→304" },
+      { k: "9 banks moved", v: "tok…head" },
+      { k: "AFTER / WNS", v: "writes 0 · +82.520 ns" },
+    ],
+    notClaimed: "open-domain LLM · Adam · Arty",
+  },
+];
+
+export const LM05_PROBES = [
+  { probe: "First-step 128-pack vs backward_full", out: "128/128", expect: "≤2 LSB or 5%", pass: true },
+  { probe: "Corpus CE dumpz + softmax_shift", out: "512→304", expect: "drop ≥30%", pass: true },
+  { probe: "All principal tensors on silicon", out: "9/9", expect: "tok pos Wq Wk Wv Wo FF1 FF2 head", pass: true },
+  { probe: "First SGD write delta", out: "512 / 2048", expect: "head / block", pass: true },
+  { probe: "AFTER cmd 12 extra TRAIN writes", out: "0", expect: "SW0 or cmd 12", pass: true },
 ];
 
 export const HW06B_PROBES = [

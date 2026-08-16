@@ -22,7 +22,7 @@ export function ConnectPanel({ onClose }: { onClose: () => void }) {
     useLab.getState().setSerialError(null);
     try {
       await connectWebSerial(115200);
-      setNote("COM8 mở. SW11 ON + BTNU. Frame A5 5A live, A5 5C RESULT.");
+      setNote("UART mở. HW-06B: COM8 + SW11+BTNU. LM-05: COM10, mọi SW tắt, 7-seg 05xx.");
     } catch (e) {
       useLab.getState().setSerialError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -35,7 +35,7 @@ export function ConnectPanel({ onClose }: { onClose: () => void }) {
       <div className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-lg border border-line bg-surface p-5 shadow-panel">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">Basys 3 · 8-agent</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">Basys 3 · 01→06B + LM-00→05</p>
             <h2 className="mt-0.5 text-lg font-medium tracking-tight">Kết nối UART</h2>
           </div>
           <Button variant="ghost" size="icon" className="size-8" onClick={onClose} aria-label="Đóng">
@@ -43,9 +43,9 @@ export function ConnectPanel({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
         <ol className="mt-3 list-decimal space-y-1 pl-4 text-sm text-mute">
-          <li>SW13 ON (dest=1), SW8:6 OFF (src=0), SW9 OFF, SW11 ON.</li>
-          <li>BTNU một lần — reset W=0040, EVAL_BEFORE → TRAIN 1024 → HOLD 0440.</li>
+          <li>HW cyclic: SW13 ON (dest=1), SW8:6 OFF, SW9 OFF, SW11 ON, rồi BTNU → HOLD 0440.</li>
           <li>Không gạt lại SW11 để train (07FF). Muốn lại: BTNU.</li>
+          <li>LM-05: nạp basys3_lm05.bit (không đè 06B). Mọi SW tắt. Chọn COM10.</li>
         </ol>
         {err ? <p className="mt-3 text-sm text-fail">{err}</p> : null}
         {note ? <p className="mt-3 text-sm text-pass">{note}</p> : null}
@@ -54,11 +54,11 @@ export function ConnectPanel({ onClose }: { onClose: () => void }) {
         ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
           {source === "board" && connected ? (
-            <Button onClick={() => void disconnectWebSerial()}>Ngắt COM8</Button>
+            <Button onClick={() => void disconnectWebSerial()}>Ngắt UART</Button>
           ) : (
             <Button onClick={() => void onSerial()} disabled={!serialOk || busy}>
               <Cable className="size-3.5" />
-              {busy ? "Đang mở…" : serialOk ? "Chọn COM8" : "Web Serial không khả dụng"}
+              {busy ? "Đang mở…" : serialOk ? "Chọn cổng COM" : "Web Serial không khả dụng"}
             </Button>
           )}
           <Button

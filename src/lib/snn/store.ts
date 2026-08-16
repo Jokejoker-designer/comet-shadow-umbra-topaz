@@ -170,7 +170,7 @@ function capture(frame: UartFrame): Snapshot {
 
 export const useLab = create<LabState>((set, get) => ({
   frame: blankFrame(),
-  log: ["8-agent cockpit. Nối COM8 hoặc bật mô phỏng + BTNU."],
+  log: ["LM-05 PASS · Basys last gate. UART COM10 (LM) / COM8 (06B) hoặc mô phỏng."],
   screen: "results",
   selectedId: "syn-1-0",
   inspectorOpen: false,
