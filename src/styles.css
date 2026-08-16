@@ -189,6 +189,74 @@
   animation: none;
 }
 
+/* Operator console: remaining viewport is the work surface. */
+.lab-workspace {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+}
+
+.lab-cockpit {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+}
+
+.lab-cockpit-stage {
+  display: flex;
+  min-height: 12rem;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+}
+
+.lab-cockpit-rail {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: auto;
+  border-top: 1px solid var(--color-line);
+  background: var(--color-panel);
+  padding: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .lab-cockpit {
+    flex-direction: row;
+  }
+
+  .lab-cockpit-rail {
+    width: 26rem;
+    flex: 0 0 26rem;
+    border-top: 0;
+    border-left: 1px solid var(--color-line);
+  }
+}
+
+.lab-matrix {
+  display: grid;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 0;
+  grid-template-columns: 2.25rem repeat(8, minmax(0, 1fr));
+  grid-template-rows: 1.75rem repeat(8, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+
+.lab-matrix-compact {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1.25rem repeat(8, minmax(0, 1fr));
+  gap: 2px;
+}
+
 @keyframes live-breathe {
   0% {
     box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-pass) 50%, transparent);

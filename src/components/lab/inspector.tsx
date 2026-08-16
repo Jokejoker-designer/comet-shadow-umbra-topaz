@@ -27,7 +27,7 @@ export function Inspector() {
   const n = uiDst != null && uiSrc != null ? (frame.updateCounts[uiDst]?.[uiSrc] ?? 0) : 0;
 
   return (
-    <aside className="flex h-full flex-col border-l border-line bg-panel">
+    <aside className="flex flex-col border border-line bg-panel">
       <div className="flex items-center justify-between border-b border-line px-3 py-2">
         <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">Inspector</div>
         <Button variant="ghost" size="icon" className="size-8" onClick={() => setInspector(false)} aria-label="Đóng">

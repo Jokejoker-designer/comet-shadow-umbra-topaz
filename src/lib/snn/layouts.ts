@@ -27,9 +27,9 @@ export function buildAgentGraph(
   lastPulse: { src: number; dst: number; at: number } | null,
   hover: number | null,
 ): { nodes: N[]; edges: E[] } {
-  const cx = 380;
-  const cy = 260;
-  const r = 200;
+  const cx = 360;
+  const cy = 280;
+  const r = 220;
   const nodes: N[] = [];
   for (let i = 0; i < 8; i++) {
     const a = (-90 + i * 45) * (Math.PI / 180);

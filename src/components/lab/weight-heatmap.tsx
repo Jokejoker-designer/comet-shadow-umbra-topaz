@@ -12,7 +12,7 @@ const VIEWS = [
   { id: "diff", label: "A ↔ B" },
 ] as const;
 
-export function WeightHeatmap() {
+export function WeightHeatmap({ fill = false }: { fill?: boolean }) {
   const sw = useLab((s) => s.sw);
   const select = useLab((s) => s.select);
   const dumps = useLab((s) => s.dumps);
@@ -34,9 +34,9 @@ export function WeightHeatmap() {
             : frame.weights;
 
   return (
-    <div>
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">64-weight matrix</div>
+    <div className={cn(fill && "flex h-full min-h-0 flex-1 flex-col")}>
+      <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2">
+        <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">64-weight · dest \ src</div>
         <div className="flex flex-wrap gap-1">
           {VIEWS.map((v) => (
             <button
@@ -64,50 +64,74 @@ export function WeightHeatmap() {
       {!matrix ? (
         <p className="text-xs text-mute">Chưa dump slot này. HOLD xong bấm DUMP A / RESET / B.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="border-collapse font-mono text-[10px] tabular-nums">
-            <thead>
-              <tr>
-                <th className="px-1 py-1 text-faint">D\\S</th>
-                {Array.from({ length: 8 }, (_, s) => (
-                  <th key={s} className="px-1 py-1 text-faint">
-                    {s}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {matrix.map((row, d) => (
-                <tr key={d}>
-                  <td className="px-1 py-1 text-faint">{d}</td>
-                  {row.map((w, s) => {
-                    const t = Math.min(1, Math.max(0, (Math.abs(w) - (dumpView === "diff" ? 0 : INITIAL_CROSS)) / (TARGET_W - INITIAL_CROSS)));
-                    const sel = dumpView === "live" && d === dd && s === ss;
-                    return (
-                      <td key={s} className="p-0.5">
-                        <button
-                          type="button"
-                          onClick={() => select(`syn-${d}-${s}`)}
-                          className={cn("block min-w-9 rounded-xs px-1 py-1 text-center", sel && "outline outline-1 outline-steel")}
-                          style={{
-                            background:
-                              s === d && dumpView !== "diff"
-                                ? "transparent"
-                                : `color-mix(in oklab, var(--color-pass) ${Math.round(t * 70)}%, var(--color-elevated))`,
-                            color: Math.abs(w) > INITIAL_CROSS ? "var(--color-ink)" : "var(--color-mute)",
-                          }}
-                        >
-                          {s === d && dumpView !== "diff" ? "—" : dumpView === "diff" && w > 0 ? `+${w}` : w}
-                        </button>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className={fill ? "lab-matrix" : "lab-matrix-compact"}>
+          <div className="flex items-center justify-center font-mono text-[10px] text-faint">D\S</div>
+          {Array.from({ length: 8 }, (_, s) => (
+            <div key={`h${s}`} className="flex items-center justify-center font-mono text-[10px] text-faint">
+              {s}
+            </div>
+          ))}
+          {matrix.map((row, d) => (
+            <MatrixRow
+              key={d}
+              d={d}
+              row={row}
+              fill={fill}
+              dumpView={dumpView}
+              selectedSrc={ss}
+              selectedDst={dd}
+              onSelect={select}
+            />
+          ))}
         </div>
       )}
     </div>
+  );
+}
+
+function MatrixRow({
+  d,
+  row,
+  fill,
+  dumpView,
+  selectedSrc,
+  selectedDst,
+  onSelect,
+}: {
+  d: number;
+  row: number[];
+  fill: boolean;
+  dumpView: string;
+  selectedSrc: number;
+  selectedDst: number;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <>
+      <div className="flex items-center justify-center font-mono text-[10px] text-faint">{d}</div>
+      {row.map((w, s) => {
+        const t = Math.min(1, Math.max(0, (Math.abs(w) - (dumpView === "diff" ? 0 : INITIAL_CROSS)) / (TARGET_W - INITIAL_CROSS)));
+        const sel = dumpView === "live" && d === selectedDst && s === selectedSrc;
+        const diag = s === d && dumpView !== "diff";
+        return (
+          <button
+            key={s}
+            type="button"
+            onClick={() => onSelect(`syn-${d}-${s}`)}
+            className={cn(
+              "flex min-h-0 min-w-0 items-center justify-center rounded-xs font-mono tabular-nums",
+              fill ? "text-sm" : "h-7 text-[10px]",
+              sel && "outline outline-1 outline-steel",
+            )}
+            style={{
+              background: diag ? "transparent" : `color-mix(in oklab, var(--color-pass) ${Math.round(t * 70)}%, var(--color-elevated))`,
+              color: Math.abs(w) > INITIAL_CROSS ? "var(--color-ink)" : "var(--color-mute)",
+            }}
+          >
+            {diag ? "—" : dumpView === "diff" && w > 0 ? `+${w}` : w}
+          </button>
+        );
+      })}
+    </>
   );
 }

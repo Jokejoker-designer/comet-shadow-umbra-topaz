@@ -44,8 +44,8 @@ function Shell({
     <div
       className={cn(
         "relative border bg-surface text-ink shadow-panel",
-        wide ? "w-52" : "w-40",
-        kind === "agent" ? "rounded-lg px-3 py-2.5" : "rounded-md px-2.5 py-2",
+        wide ? "w-52" : "w-36",
+        kind === "agent" ? "rounded-lg px-3 py-2" : "rounded-md px-2.5 py-2",
         selected ? "border-steel" : "border-line",
         pulsing && kind === "agent" && "agent-pulse",
       )}

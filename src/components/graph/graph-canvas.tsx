@@ -37,7 +37,7 @@ function FlowInner() {
 
   useEffect(() => {
     const t = window.setTimeout(() => {
-      void fitView({ padding: 0.2, duration: 200 });
+      void fitView({ padding: 0.12, duration: 200 });
     }, 80);
     return () => window.clearTimeout(t);
   }, [screen, fitView]);
@@ -49,8 +49,8 @@ function FlowInner() {
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       fitView
-      fitViewOptions={{ padding: 0.2 }}
-      minZoom={0.18}
+      fitViewOptions={{ padding: 0.12 }}
+      minZoom={0.12}
       maxZoom={1.8}
       proOptions={{ hideAttribution: true }}
       onNodeClick={(_, node) => {
@@ -67,7 +67,9 @@ function FlowInner() {
       colorMode="dark"
     >
       <Background variant={BackgroundVariant.Dots} gap={22} size={1} />
-      <MiniMap pannable zoomable maskColor="rgb(9 9 11 / 0.72)" nodeColor="var(--color-elevated)" />
+      {screen === "agents" ? (
+        <MiniMap pannable zoomable maskColor="rgb(9 9 11 / 0.72)" nodeColor="var(--color-elevated)" />
+      ) : null}
       <Controls showInteractive={false} />
     </ReactFlow>
   );

@@ -10,6 +10,7 @@ function Switch({
   hint,
   role,
   locked,
+  large,
   onToggle,
 }: {
   on: boolean;
@@ -17,6 +18,7 @@ function Switch({
   hint: string;
   role: string;
   locked?: boolean;
+  large?: boolean;
   onToggle: () => void;
 }) {
   return (
@@ -25,18 +27,19 @@ function Switch({
       title={hint}
       onClick={onToggle}
       disabled={locked}
-      className="flex w-8 flex-col items-center gap-0.5 disabled:cursor-not-allowed sm:w-9"
+      className={cn("flex min-w-0 flex-col items-center gap-1 disabled:cursor-not-allowed", large ? "w-full" : "w-10")}
     >
-      <span className="relative h-9 w-4 rounded-sm border border-line-strong bg-canvas">
+      <span className={cn("relative rounded-sm border border-line-strong bg-canvas", large ? "h-11 w-5" : "h-8 w-3.5")}>
         <span
           className={cn(
-            "absolute left-0.5 right-0.5 h-3.5 rounded-sm transition-transform duration-150",
+            "absolute left-0.5 right-0.5 rounded-sm transition-transform duration-150",
+            large ? "h-4" : "h-3",
             on ? "top-0.5 bg-steel" : "bottom-0.5 bg-faint",
           )}
         />
       </span>
-      <span className={cn("font-mono text-[8px] leading-none", on ? "text-ink" : "text-faint")}>{label}</span>
-      <span className="font-mono text-[7px] leading-none text-faint">{role}</span>
+      <span className={cn("font-mono leading-none", large ? "text-[11px]" : "text-[10px]", on ? "text-ink" : "text-faint")}>{label}</span>
+      <span className={cn("font-mono leading-none text-faint", large ? "text-[10px]" : "text-[9px]")}>{role}</span>
     </button>
   );
 }
@@ -58,7 +61,7 @@ function Btn({ id, flash, onPress }: { id: BtnId; flash: boolean; onPress: () =>
   );
 }
 
-export function Basys3Panel() {
+export function Basys3Panel({ large = false }: { large?: boolean }) {
   const sw = useLab((s) => s.sw);
   const led = useLab((s) => s.led);
   const frame = useLab((s) => s.frame);
@@ -79,41 +82,42 @@ export function Basys3Panel() {
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">Basys 3 · XC7A35T</div>
+          <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-faint">Basys 3 · XC7A35T · SW15…0</div>
           <div className="mt-0.5 text-xs text-mute">
             {live
-              ? "Paddle chỉ đổi khi bạn gạt (trừ SW11 = flags). LED8 BUSY nháy ≠ SW8."
-              : "Paddle = SW. Chấm hàng trên = LED. SW8 không phải LEARN."}
+              ? "Hai hàng: SW15–8 rồi SW7–0. LED8 BUSY ≠ SW8."
+              : "Paddle = SW. Chấm trên = LED. SW8 = SRC2, không phải LEARN."}
           </div>
         </div>
         <SevenSeg value={frame.weight} />
       </div>
 
-      <div className="overflow-x-auto rounded-md border border-line bg-canvas px-2 py-2">
-        <div className="mb-1 flex min-w-[40rem] justify-between">
-          {Array.from({ length: 16 }, (_, i) => 15 - i).map((i) => (
-            <div key={i} className="flex w-8 flex-col items-center sm:w-9">
-              <span
-                title={`LED${i} ${LED_LABEL[i]}`}
-                className={cn("h-2 w-2 rounded-full", led[i] ? "bg-pass shadow-[0_0_8px_var(--color-pass)]" : "bg-line")}
-              />
-              <span className="mt-0.5 font-mono text-[7px] text-faint">{LED_LABEL[i]}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex min-w-[40rem] justify-between">
-          {Array.from({ length: 16 }, (_, i) => 15 - i).map((i) => (
-            <Switch
-              key={i}
-              on={sw[i]}
-              label={`SW${i}`}
-              role={SW_LABEL[i]}
-              hint={SW_HINT[i]}
-              locked={live && rxBytes > 0 && i === 11}
-              onToggle={() => toggleSw(i)}
-            />
-          ))}
-        </div>
+      <div className="space-y-3 rounded-md border border-line bg-canvas p-2">
+        {[
+          { from: 15, to: 8 },
+          { from: 7, to: 0 },
+        ].map((row) => (
+          <div key={row.from} className="grid grid-cols-8 justify-items-center gap-1">
+            {Array.from({ length: 8 }, (_, k) => row.from - k).map((i) => (
+              <div key={i} className="flex min-w-0 flex-col items-center gap-1">
+                <span
+                  title={`LED${i} ${LED_LABEL[i]}`}
+                  className={cn("rounded-full", large ? "h-2.5 w-2.5" : "h-2 w-2", led[i] ? "bg-pass shadow-[0_0_8px_var(--color-pass)]" : "bg-line")}
+                />
+                <span className="font-mono text-[9px] text-faint">{LED_LABEL[i]}</span>
+                <Switch
+                  on={sw[i]}
+                  label={`SW${i}`}
+                  role={SW_LABEL[i]}
+                  hint={SW_HINT[i]}
+                  large={large}
+                  locked={live && rxBytes > 0 && i === 11}
+                  onToggle={() => toggleSw(i)}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
 
       <div className="flex items-center justify-between gap-3">
